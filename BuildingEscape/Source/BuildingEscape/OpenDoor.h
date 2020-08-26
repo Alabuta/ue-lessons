@@ -33,7 +33,6 @@ private:
 	UPROPERTY(EditAnywhere)
 	ATriggerVolume *pressurePlate{nullptr};
 
-	UPROPERTY(EditAnywhere)
 	AActor *actorThatOpens{nullptr};
 
 	void OpenDoor();
