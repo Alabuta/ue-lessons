@@ -24,5 +24,19 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-		
+private:
+
+	void SetupInputComponent();
+
+	void Grab();
+	void Release();
+
+private:
+
+	UPROPERTY(EditAnywhere)
+	float reachDistance{100.f};
+
+	UPhysicsHandleComponent *physicsHandleComponent{nullptr};
+
+	UInputComponent *inputComponent{nullptr};
 };
