@@ -7,18 +7,11 @@
 #include "Components/InputComponent.h"
 
 
-// Sets default values for this component's properties
 UGrabber::UGrabber()
 {
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
-
-	// ...
 }
 
-
-// Called when the game starts
 void UGrabber::BeginPlay()
 {
 	Super::BeginPlay();
@@ -47,40 +40,51 @@ void UGrabber::SetupInputComponent()
 	else UE_LOG(LogTemp, Error, TEXT("'%s' missing input componet"), *owner->GetName())
 }
 
-
-// Called every frame
 void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	if (physicsHandleComponent && physicsHandleComponent->GrabbedComponent) {
+		auto [lineStart, lineEnd] = GetReachLinePoints();
+		physicsHandleComponent->SetTargetLocation(lineEnd);
+	}
+}
+
+TPair<FVector, FVector> UGrabber::GetReachLinePoints() const
+{
+	FVector location;
+	FRotator rotation;
+
+	if (auto controller = GetWorld()->GetFirstPlayerController(); controller)
+		controller->GetPlayerViewPoint(location, rotation);
+
+	return TPair<FVector, FVector>{location, location + rotation.Vector() * reachDistance};
 }
 
 void UGrabber::Grab()
 {
-	if (auto world = GetWorld(); world) {
-		if (auto controller = world->GetFirstPlayerController(); controller) {
-			FVector location;
-			FRotator rotation;
+	auto world = GetWorld();
 
-			controller->GetPlayerViewPoint(location, rotation);
+	if (auto controller = world->GetFirstPlayerController(); controller) {
+		auto [lineStart, lineEnd] = GetReachLinePoints();
 
-			FVector lineTraceEnd = location + rotation.Vector() * reachDistance;
-			DrawDebugLine(world, location, lineTraceEnd, FColor{255, 255, 0});
+		FHitResult hitResult;
+		FCollisionQueryParams collisionQueryParams{FName{TEXT("")}, false, GetOwner()};
 
-			FHitResult hitResult;
-			FCollisionQueryParams collisionQueryParams{FName{TEXT("")}, false, GetOwner()};
+		world->LineTraceSingleByObjectType(
+			hitResult, lineStart, lineEnd, FCollisionObjectQueryParams{ECollisionChannel::ECC_PhysicsBody}, collisionQueryParams
+		);
 
-			world->LineTraceSingleByObjectType(
-				hitResult, location, lineTraceEnd, FCollisionObjectQueryParams{ECollisionChannel::ECC_PhysicsBody}, collisionQueryParams
-			);
-
-			if (auto actor = hitResult.GetActor(); actor)
-				UE_LOG(LogTemp, Warning, TEXT("UGrabber: object '%s' "), *actor->GetName())
+		if (auto actor = hitResult.GetActor(); actor) {
+			auto grabComponent = hitResult.GetComponent();
+			physicsHandleComponent->GrabComponentAtLocation(grabComponent, NAME_None, actor->GetActorLocation());
 		}
 	}
 }
 
 void UGrabber::Release()
 {
-	;
+	if (physicsHandleComponent)
+		physicsHandleComponent->ReleaseComponent();
 }
 

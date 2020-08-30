@@ -1,48 +1,57 @@
 // MIT License Copyright(c) 2020 Almaz Kinziabulatov
 
-
 #include "OpenDoor.h"
+#include "Components/PrimitiveComponent.h"
 
-// Sets default values for this component's properties
+
 UOpenDoor::UOpenDoor()
 {
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
-
-	// ...
 }
 
-// Called when the game starts
 void UOpenDoor::BeginPlay()
 {
 	Super::BeginPlay();
-
-	if (auto world = GetWorld(); world)
-		if (auto controller = world->GetFirstPlayerController(); controller)
-			actorThatOpens = controller->GetPawn();
 }
 
 void UOpenDoor::OpenOrCloseDoor(bool open)
 {
-	if (auto owner = GetOwner(); owner)
-		owner->SetActorRotation(FRotator{0.f, openAngle * static_cast<float>(open), 0.f});
+	GetOwner()->SetActorRotation(FRotator{0.f, openAngle * static_cast<float>(open), 0.f});
 }
 
-// Called every frame
+float UOpenDoor::GetTotalMassOfActorsOnPlate() const
+{
+	if (pressurePlate == nullptr)
+		return 0.f;
+
+	TArray<AActor *> overlappingActors;
+	pressurePlate->GetOverlappingActors(overlappingActors);
+
+	float totalMass = 0.f;
+
+	for (auto overlappingActor : overlappingActors) {
+		auto primitiveComponent = overlappingActor->FindComponentByClass<UPrimitiveComponent>();
+
+		if (primitiveComponent)
+			totalMass += primitiveComponent->GetMass();
+	}
+
+	return totalMass;
+}
+
 void UOpenDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	if (pressurePlate && pressurePlate->IsOverlappingActor(actorThatOpens)) {
+	auto world = GetWorld();
+
+	if (GetTotalMassOfActorsOnPlate() > doorOpenMassValue) {
 		OpenOrCloseDoor(true);
 
-		if (auto world = GetWorld(); world)
-			lastTimeDoorOpened = world->GetTimeSeconds();
+		lastTimeDoorOpened = world->GetTimeSeconds();
 	}
 
-	if (auto world = GetWorld(); world)
-		if (world->GetTimeSeconds() - lastTimeDoorOpened > doorCloseDelay)
-			OpenOrCloseDoor(false);
+	if (world->GetTimeSeconds() - lastTimeDoorOpened > doorCloseDelay)
+		OpenOrCloseDoor(false);
 }
 

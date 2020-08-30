@@ -28,6 +28,8 @@ private:
 
 	void SetupInputComponent();
 
+	TPair<FVector, FVector> GetReachLinePoints() const;
+
 	void Grab();
 	void Release();
 
