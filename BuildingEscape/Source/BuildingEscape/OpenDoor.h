@@ -8,6 +8,9 @@
 #include "OpenDoor.generated.h"
 
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDoorOpenRequest);
+
+
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class BUILDINGESCAPE_API UOpenDoor : public UActorComponent
 {
@@ -18,6 +21,11 @@ public:
 	UOpenDoor();
 
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
+public:
+
+	UPROPERTY(BlueprintAssignable)
+	FOnDoorOpenRequest onDoorOpenRequest;
 
 protected:
 

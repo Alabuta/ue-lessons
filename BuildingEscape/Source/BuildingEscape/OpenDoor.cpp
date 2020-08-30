@@ -16,7 +16,9 @@ void UOpenDoor::BeginPlay()
 
 void UOpenDoor::OpenOrCloseDoor(bool open)
 {
-	GetOwner()->SetActorRotation(FRotator{0.f, openAngle * static_cast<float>(open), 0.f});
+	//GetOwner()->SetActorRotation(FRotator{0.f, openAngle * static_cast<float>(open), 0.f});
+	if (open)
+		onDoorOpenRequest.Broadcast();
 }
 
 float UOpenDoor::GetTotalMassOfActorsOnPlate() const
