@@ -14,13 +14,6 @@ void UOpenDoor::BeginPlay()
 	Super::BeginPlay();
 }
 
-void UOpenDoor::OpenOrCloseDoor(bool open)
-{
-	//GetOwner()->SetActorRotation(FRotator{0.f, openAngle * static_cast<float>(open), 0.f});
-	if (open)
-		onDoorOpenRequest.Broadcast();
-}
-
 float UOpenDoor::GetTotalMassOfActorsOnPlate() const
 {
 	if (pressurePlate == nullptr)
@@ -47,13 +40,9 @@ void UOpenDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 
 	auto world = GetWorld();
 
-	if (GetTotalMassOfActorsOnPlate() > doorOpenMassValue) {
-		OpenOrCloseDoor(true);
+	if (GetTotalMassOfActorsOnPlate() > triggerMassValue)
+		onOpen.Broadcast();
 
-		lastTimeDoorOpened = world->GetTimeSeconds();
-	}
-
-	if (world->GetTimeSeconds() - lastTimeDoorOpened > doorCloseDelay)
-		OpenOrCloseDoor(false);
+	else onClose.Broadcast();
 }
 

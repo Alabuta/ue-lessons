@@ -8,7 +8,7 @@
 #include "OpenDoor.generated.h"
 
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDoorOpenRequest);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FDoorEvent);
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -25,7 +25,10 @@ public:
 public:
 
 	UPROPERTY(BlueprintAssignable)
-	FOnDoorOpenRequest onDoorOpenRequest;
+	FDoorEvent onOpen;
+
+	UPROPERTY(BlueprintAssignable)
+	FDoorEvent onClose;
 
 protected:
 
@@ -33,22 +36,12 @@ protected:
 
 private:
 
-	void OpenOrCloseDoor(bool open);
-
 	float GetTotalMassOfActorsOnPlate() const;
 
 private:
 
 	UPROPERTY(EditAnywhere)
-	float openAngle{-64.f};
-
-	UPROPERTY(EditAnywhere)
-	float doorCloseDelay{1.f};
-
-	float lastTimeDoorOpened{0.f};
-
-	UPROPERTY(EditAnywhere)
-	float doorOpenMassValue{10.f};
+	float triggerMassValue{10.f};
 
 	UPROPERTY(EditAnywhere)
 	ATriggerVolume *pressurePlate{nullptr};
