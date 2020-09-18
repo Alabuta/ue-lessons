@@ -8,7 +8,6 @@ void ATankPlayerController::BeginPlay()
 {
     Super::BeginPlay();
 
-
     if (auto tank = GetControlledTank(); tank)
         UE_LOG(LogTemp, Warning, TEXT("Tank %s"), *(tank->GetName()))
 
