@@ -14,7 +14,56 @@ void ATankPlayerController::BeginPlay()
     else UE_LOG(LogTemp, Warning, TEXT("Not posessing a tank"))
 }
 
+void ATankPlayerController::Tick(float DeltaTime)
+{
+    Super::Tick(DeltaTime);
+
+    AimTowardsCrosshair();
+}
+
 ATank *ATankPlayerController::GetControlledTank() const
 {
     return Cast<ATank>(GetPawn());
+}
+
+void ATankPlayerController::AimTowardsCrosshair()
+{
+    if (auto tank = GetControlledTank(); tank) {
+        if (auto hitLocation = GetSightRayHitLocation(); hitLocation) {
+            UE_LOG(LogTemp, Warning, TEXT("Hit at %s"), *hitLocation->ToString())
+        }
+    }
+}
+
+//TPair<FVector, FVector> UGrabber::GetReachLinePoints() const
+//{
+//    FVector location;
+//    FRotator rotation;
+//
+//    if (auto controller = GetWorld()->GetFirstPlayerController(); controller)
+//        controller->GetPlayerViewPoint(location, rotation);
+//
+//    return TPair<FVector, FVector>{location, location + rotation.Vector() * reachDistance};
+//}
+
+std::optional<FVector> ATankPlayerController::GetSightRayHitLocation() const
+{
+    FHitResult hitResult;
+    FCollisionQueryParams collisionQueryParams{FName{TEXT("")}, false, GetOwner()};
+
+    auto world = GetWorld();
+
+    auto [lineStart, lineEnd] = std::pair(FVector{0}, FVector{0});
+
+    world->LineTraceSingleByObjectType(
+        hitResult, lineStart, lineEnd, FCollisionObjectQueryParams{ECollisionChannel::ECC_PhysicsBody}, collisionQueryParams
+    );
+
+    if (auto actor = hitResult.GetActor(); actor) {
+        return hitResult.Get
+        /*auto grabComponent = hitResult.GetComponent();
+        physicsHandleComponent->GrabComponentAtLocation(grabComponent, NAME_None, actor->GetActorLocation());*/
+    }
+
+    return {};
 }

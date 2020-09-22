@@ -3,6 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+
+#include <optional>
+
 #include "Tank.h"
 #include "GameFramework/PlayerController.h"
 #include "TankPlayerController.generated.h"
@@ -20,5 +23,12 @@ public:
 	ATank *GetControlledTank() const;
 
 	void BeginPlay() override;
+
+	void Tick(float DeltaTime) override;
+
+	void AimTowardsCrosshair();
+
+private:
 	
+	std::optional<FVector> GetSightRayHitLocation() const;
 };
