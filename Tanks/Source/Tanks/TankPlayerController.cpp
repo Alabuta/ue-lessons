@@ -48,22 +48,32 @@ void ATankPlayerController::AimTowardsCrosshair()
 
 std::optional<FVector> ATankPlayerController::GetSightRayHitLocation() const
 {
-    FHitResult hitResult;
-    FCollisionQueryParams collisionQueryParams{FName{TEXT("")}, false, GetOwner()};
+    int viewportWidth, viewportHeight;
+    GetViewportSize(viewportWidth, viewportHeight);
 
-    auto world = GetWorld();
+    auto screenLocation = crossHairLocation * FVector2D{static_cast<float>(viewportWidth), static_cast<float>(viewportHeight)};
 
-    auto [lineStart, lineEnd] = std::pair(FVector{0}, FVector{0});
+    FVector location, direction;
+    DeprojectScreenPositionToWorld(screenLocation.X, screenLocation.Y, location, direction);
 
-    world->LineTraceSingleByObjectType(
-        hitResult, lineStart, lineEnd, FCollisionObjectQueryParams{ECollisionChannel::ECC_PhysicsBody}, collisionQueryParams
-    );
+    return direction;
 
-    if (auto actor = hitResult.GetActor(); actor) {
-        return hitResult.Get
-        /*auto grabComponent = hitResult.GetComponent();
-        physicsHandleComponent->GrabComponentAtLocation(grabComponent, NAME_None, actor->GetActorLocation());*/
-    }
+    //FHitResult hitResult;
+    //FCollisionQueryParams collisionQueryParams{FName{TEXT("")}, false, GetOwner()};
+
+    //auto world = GetWorld();
+
+    //auto [lineStart, lineEnd] = std::pair(FVector{0}, FVector{0});
+
+    //world->LineTraceSingleByObjectType(
+    //    hitResult, lineStart, lineEnd, FCollisionObjectQueryParams{ECollisionChannel::ECC_PhysicsBody}, collisionQueryParams
+    //);
+
+    //if (auto actor = hitResult.GetActor(); actor) {
+    //    return hitResult.Get
+    //    /*auto grabComponent = hitResult.GetComponent();
+    //    physicsHandleComponent->GrabComponentAtLocation(grabComponent, NAME_None, actor->GetActorLocation());*/
+    //}
 
     return {};
 }

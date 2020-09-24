@@ -20,6 +20,11 @@ class TANKS_API ATankPlayerController : public APlayerController
 
 public:
 
+	UPROPERTY(EditAnywhere)
+	FVector2D crossHairLocation{.5f, .333f};
+
+private:
+
 	ATank *GetControlledTank() const;
 
 	void BeginPlay() override;
